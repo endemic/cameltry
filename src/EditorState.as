@@ -7,7 +7,7 @@ package {
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	
-	public class EditorState extends Sprite {
+	public class EditorState extends GameState {
 		
 		public var buffer:Sprite = new Sprite;
 		public var camera_offset:Object = { x:0, y:0 }
@@ -17,7 +17,7 @@ package {
 		public var level_data:Array;
 		public var display_objects:Array = new Array;
 		public var show_level_data:Boolean = false;
-		public var keys:Array = new Array(256);	// Stores boolean values for keypresses
+		public var Main.keys:Array = new Array(256);	// Stores boolean values for keypresses
 		
 		public function EditorState():void {
 			
@@ -35,19 +35,17 @@ package {
 			addEventListener(Event.ENTER_FRAME, update);
 			stage.addEventListener(MouseEvent.MOUSE_DOWN, mouse_clicked);
 			stage.addEventListener(MouseEvent.MOUSE_UP, mouse_released);
-			stage.addEventListener(KeyboardEvent.KEY_DOWN, function(e:KeyboardEvent):void { keys[e.keyCode] = true; } );
-			stage.addEventListener(KeyboardEvent.KEY_UP,   function(e:KeyboardEvent):void { keys[e.keyCode] = false; } );
 		}
 		
 		public function update(e:Event = null):void {
 			// Handle camera movement
-			if (keys[0x25] || keys[0x41]) camera_offset.x += 10;
-	        if (keys[0x26] || keys[0x57]) camera_offset.y += 10;
-	        if (keys[0x27] || keys[0x44]) camera_offset.x -= 10;
-	        if (keys[0x28] || keys[0x53]) camera_offset.y -= 10;
+			if (Main.keys[0x25] || Main.keys[0x41]) camera_offset.x += 10;
+	        if (Main.keys[0x26] || Main.keys[0x57]) camera_offset.y += 10;
+	        if (Main.keys[0x27] || Main.keys[0x44]) camera_offset.x -= 10;
+	        if (Main.keys[0x28] || Main.keys[0x53]) camera_offset.y -= 10;
 			
 			// ESC toggles showing level data string
-			if(keys[0x1B])
+			if(Main.keys[0x1B])
 				show_level_data = show_level_data ? false : true;
 			
 			if(show_level_data) {
@@ -101,6 +99,12 @@ package {
 		public function mouse_released(e:MouseEvent = null):void {
 			// Reset "clicked" flag
 			mouse_button_down = false;
+		}
+		
+		public override function destroy():void {
+			removeEventListener(Event.ENTER_FRAME, update);
+			stage.removeEventListener(MouseEvent.MOUSE_DOWN, mouse_clicked);
+			stage.removeEventListener(MouseEvent.MOUSE_UP, mouse_released);
 		}
 	}
 }

@@ -13,22 +13,26 @@
 		public var number_of_sides:int;
 		public var points:Array;
 		
-		public function Actor(x_pos:int, y_pos:int, init_color:Number):void {
+		public function Actor(X:int, Y:int, Color:Number):void {
 			g = graphics;
 			w = 20; 
 			h = 20;
-			color = init_color;
+			color = Color;
+			x = X;
+			y = Y;
 			
 			points = new Array();
-			points.push({ x: -w / 2, y: -h / 2 });	// Upper left
+			points.push(new Point(-(w>>1), -(h>>1)));	// Upper left
+			points.push(new Point(w>>1, -(h>>1)));	// Upper right
+			points.push(new Point(w>>1, h>>1));	// Lower right
+			points.push(new Point(-(w>>1), h>>1));	// Lower left
+			
+/*			points.push({ x: -w / 2, y: -h / 2 });	// Upper left
 			points.push({ x: w / 2, y: -h / 2 });	// Upper right
 			points.push({ x: w / 2, y: h / 2 });	// Lower right
-			points.push({ x: -w / 2, y: h / 2 });	// Lower left
+			points.push({ x: -w / 2, y: h / 2 });	// Lower left*/
 			
 			number_of_sides = points.length;
-			
-			x = x_pos;
-			y = y_pos;
 		}
 		
 		public function draw(g:Graphics):void {

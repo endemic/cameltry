@@ -5,7 +5,7 @@
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	
-	public class MenuState extends Sprite {
+	public class MenuState extends GameState {
 		public var play_button:TextField = new TextField;
 		public var edit_button:TextField = new TextField;
 		
@@ -27,30 +27,18 @@
 			play_button.text = "PLAY";
 			edit_button.text = "EDIT";
 			
-			edit_button.addEventListener(MouseEvent.CLICK, switch_to_edit_state);
-			play_button.addEventListener(MouseEvent.CLICK, switch_to_game_state);
+			edit_button.addEventListener(MouseEvent.CLICK, function(e:MouseEvent):void { Main.changeState(EditorState) });
+			play_button.addEventListener(MouseEvent.CLICK, function(e:MouseEvent):void { Main.changeState(PlayState) });
 			
 			addChild(edit_button);
 			addChild(play_button);
 		}
 		
-		public function destroy():void {
+		public override function destroy():void {
 			removeChild(play_button);
 			removeChild(edit_button);
-			edit_button.removeEventListener(MouseEvent.CLICK, switch_to_edit_state);
-			play_button.removeEventListener(MouseEvent.CLICK, switch_to_game_state);
-		}
-		
-		public function switch_to_game_state(e:MouseEvent = null):void {
-			destroy();
-			this.parent.addChild(new GameState);
-			this.parent.removeChild(this);
-		}
-		
-		public function switch_to_edit_state(e:MouseEvent = null):void {
-			destroy();
-			this.parent.addChild(new EditorState);
-			this.parent.removeChild(this);
+			edit_button.removeEventListener(MouseEvent.CLICK, function(e:MouseEvent):void { Main.changeState(EditorState) });
+			play_button.removeEventListener(MouseEvent.CLICK, function(e:MouseEvent):void { Main.changeState(PlayState) });
 		}
 	}
 	
