@@ -17,7 +17,12 @@ package {
 		public var level_data:Array;
 		public var display_objects:Array = new Array;
 		public var show_level_data:Boolean = false;
-		public var Main.keys:Array = new Array(256);	// Stores boolean values for keypresses
+		
+		// Update/display a text field w/ level array info - byte array then writeObject
+		private var overlay:Sprite = new Sprite();
+		private var serialized_level_string:TextField = new TextField;
+		private var serialized_level_data:ByteArray = new ByteArray();
+
 		
 		public function EditorState():void {
 			
@@ -33,8 +38,17 @@ package {
 			
 			// Set up event listeners
 			addEventListener(Event.ENTER_FRAME, update);
-			stage.addEventListener(MouseEvent.MOUSE_DOWN, mouse_clicked);
-			stage.addEventListener(MouseEvent.MOUSE_UP, mouse_released);
+			
+			// Set up "console" sprite to display level data
+			overlay.graphics.beginFill(0x000000, 0.5);
+			overlay.graphics.drawRect(0, 0, 640, 480);
+			overlay.graphics.endFill();
+			
+			serialized_level_string.textColor = 0xffffff;
+			serialized_level_string.width = Main.SCREEN_WIDTH;
+			serialized_level_string.height = Main.SCREEN_HEIGHT;
+			overlay.addChild(serialized_level_string);
+			addChild(overlay);
 		}
 		
 		public function update(e:Event = null):void {
@@ -48,19 +62,15 @@ package {
 			if(Main.keys[0x1B])
 				show_level_data = show_level_data ? false : true;
 			
-			if(show_level_data) {
-				// Update/display a text field w/ level array info - byte array then writeObject
-				var transparent_background:Sprite = new Sprite();
-				transparent_background.graphics.beginFill(0x000000, 0.5);
-				transparent_background.graphics.drawRect(0, 0, 640, 480);
-				transparent_background.graphics.endFill();
-				
-				var serialized_level_string:TextField = new TextField;
-				var serialized_level_data:ByteArray = new ByteArray();
+			if (show_level_data) 
+			{
 				serialized_level_data.writeObject(display_objects);
 				serialized_level_string.text = serialized_level_data.toString();
-				transparent_background.addChild(serialized_level_string);
-				addChild(transparent_background);
+				overlay.visible = true;
+			}
+			else 
+			{
+				overlay.visible = false;
 			}
 			
 			buffer.x = camera_offset.x;
@@ -77,34 +87,24 @@ package {
 			
 			for each(var a:Actor in display_objects)
 				a.draw(buffer.graphics);
-		}
-		
-		public function mouse_clicked(e:MouseEvent = null):void {
-			// Check to ensure only one event happens per click
-			if(mouse_button_down == false) {
-				mouse_button_down = true;
 				
+			if (Main.mouseClick == 1 && !overlay.visible) 
+			{
 				// Check mouse status here -- decide whether to add an object, modify it (adjust width/height, rotation), or delete it
 				// For now, just place objects
 				// Place object at rounded cursor position
-				var collision_block_x:int = Math.floor((stage.mouseX - camera_offset.x) / collision_block_size);
-				var collision_block_y:int = Math.floor((stage.mouseY - camera_offset.y) / collision_block_size);
-				var a:Actor = new Actor(stage.mouseX - camera_offset.x, stage.mouseY - camera_offset.y, 0x00ff00);
+				var collision_block_x:int = Math.floor((Main.mouse.x - camera_offset.x) / collision_block_size);
+				var collision_block_y:int = Math.floor((Main.mouse.y - camera_offset.y) / collision_block_size);
+				a = new Actor(Main.mouse.x - camera_offset.x, Main.mouse.y - camera_offset.y, 0x00ff00);
 				// do we even need to do this? 
 				level_data[collision_block_x][collision_block_y].push(a);
 				display_objects.push(a);
 			}
 		}
-		
-		public function mouse_released(e:MouseEvent = null):void {
-			// Reset "clicked" flag
-			mouse_button_down = false;
-		}
-		
+
 		public override function destroy():void {
+			removeChild(buffer);
 			removeEventListener(Event.ENTER_FRAME, update);
-			stage.removeEventListener(MouseEvent.MOUSE_DOWN, mouse_clicked);
-			stage.removeEventListener(MouseEvent.MOUSE_UP, mouse_released);
 		}
 	}
 }
