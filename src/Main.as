@@ -29,7 +29,7 @@
 			addEventListener(Event.ENTER_FRAME, update);
 			
 			// Change to inital game state
-			changeState(MenuState);
+			changeState(PlayState);
 		}
 		
 		private function update(e:Event):void 

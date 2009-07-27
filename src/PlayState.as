@@ -15,13 +15,13 @@ package {
 		public var buffer:Sprite = new Sprite;
 		public var rotation_container:Sprite = new Sprite;
 	
-		public var player:Actor, enemies:Array;
+		public var player:Player, enemies:Array;
 		
 		public function PlayState():void {
 			main = this;
 			g = graphics;
 			
-			player = new Actor(320, 240, 0x00ff00);
+			player = new Player(320, 240, 0x00ff00);
 			
 			buffer.x = -320; buffer.y = -240;
 			rotation_container.x = player.x; rotation_container.y = player.y;
@@ -95,7 +95,7 @@ package {
 			player.dx += player.ddx;
 			player.dy += player.ddy;
 			
-			// Increment position based on velocity
+			// Increment player position based on velocity
 			player.x += player.dx;
 			player.y += player.dy;
 			
