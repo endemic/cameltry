@@ -33,7 +33,7 @@ package {
 			var closest_point:Object = { key: 0, distance: 100000 };
 			
 			// Test sides of other poly
-			for(i = 0; i < a.number_of_sides; i++) {
+			for(i = 0; i < a.number_of_sides + 1; i++) {
 				// Get vector to project onto - to speed this up, we could pre-calculate these normals when the poly is created
 				// These are vector normals, which is why we're assigning y values to x, etc. (inverting them)
 				if(i == 0) 
@@ -41,10 +41,18 @@ package {
 					projection_vector.x = a.points[a.number_of_sides - 1].y - a.points[0].y;
 					projection_vector.y = a.points[0].x - a.points[a.number_of_sides - 1].x;
 				}
-				else 
+				else if(i < a.number_of_sides)	// Use side as projection vector
 				{
 					projection_vector.x = a.points[i - 1].y - a.points[i].y;
 					projection_vector.y = a.points[i].x - a.points[i - 1].x;
+				}
+				else	// Use the closest point on poly and center of circle as projection vector
+				{
+					projection_vector.x = self.y - a.points[closest_point.key].y;
+					projection_vector.y = a.points[closest_point.key].x - self.x;
+					
+/*					projection_vector.x = a.points[closest_point.key].y - self.y;
+					projection_vector.y = self.x - a.points[closest_point.key].x;*/
 				}
 				
 				// Find point closest to center of self to test against later
@@ -109,59 +117,6 @@ package {
 					}
 				}
 			}
-			
-			// Test vs. shortest line between convex poly and circle
-			projection_vector.x = self.y - a.points[closest_point.key].y;
-			projection_vector.y = a.points[closest_point.key].x - self.x;
-
-			// Normalize projection vector
-			vector_length = Math.sqrt(projection_vector.x * projection_vector.x + projection_vector.y * projection_vector.y);
-			projection_vector.x /= vector_length;
-			projection_vector.y /= vector_length;
-			
-			// Project each side of self (circle) onto projection vector
-			// Set min/max to be the first projection plus/minus circle radius
-			self.minimum = (x * projection_vector.x + y * projection_vector.y) - radius;
-			self.maximum = (x * projection_vector.x + y * projection_vector.y) + radius;
-			
-			// Correct for local vs. global offset
-			offset = x * projection_vector.x + y * projection_vector.y;
-			self.minimum += offset;
-			self.maximum += offset;
-			
-			// Project other poly onto projection vector
-			// Set the min/max to be the first projection (dot product)
-			other.minimum = other.maximum = a.points[0].x * projection_vector.x + a.points[0].y * projection_vector.y;
-			
-			// Correct for local vs. global offset
-			offset = a.x * projection_vector.x + a.y * projection_vector.y;
-			other.minimum += offset;
-			other.maximum += offset;
-			
-			// Test if lines intersect - if not, return false
-			if(self.maximum < other.minimum || self.minimum > other.maximum)
-				return false;
-			else {
-				d0 = self.maximum - other.minimum;
-				d1 = other.maximum - self.minimum;
-				d = (d0 < d1) ? -d0 : d1;
-				
-				l2 = projection_vector.x * projection_vector.x + projection_vector.y * projection_vector.y;
-				m = {
-						x: projection_vector.x * (d / l2),
-						y: projection_vector.y * (d / l2)
-					};
-					
-				// Length of "penetration" vector
-				m2 = (d * d) / l2;
-
-				if(penetration_vector.length < 0 || m2 < penetration_vector.length) {
-					penetration_vector.length = m2;
-					penetration_vector.x = m.x;
-					penetration_vector.y = m.y;
-				}
-			}
-			
 			
 			// If all else fails, there's a collision
 			return penetration_vector;
