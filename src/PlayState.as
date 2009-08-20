@@ -12,7 +12,7 @@ package {
 		
 		public var g:Graphics;
 		//public var buffer:BitmapData = new BitmapData(SCREEN_WIDTH, SCREEN_HEIGHT, false, 0xffffff);
-		public var buffer:Sprite = new Sprite;
+		static public var buffer:Sprite = new Sprite;
 		public var rotation_container:Sprite = new Sprite;
 	
 		public var player:Player, enemies:Array;
@@ -30,9 +30,9 @@ package {
 			addChild(rotation_container);
 			
 			enemies = new Array();
-			/*
+			
 			enemies.push(new Actor(280, 300, 0xff0000));
-			enemies.push(new Actor(280, 280, 0xff0000));
+			/*enemies.push(new Actor(280, 280, 0xff0000));
 			enemies.push(new Actor(280, 260, 0xff0000));
 			enemies.push(new Actor(280, 240, 0xff0000));
 			enemies.push(new Actor(280, 220, 0xff0000));
@@ -62,8 +62,7 @@ package {
 			
 			enemies.push(new Actor(300, 100, 0xff0000));
 			enemies.push(new Actor(320, 100, 0xff0000));
-			*/
-			enemies.push(new Actor(340, 100, 0xff0000));
+			enemies.push(new Actor(340, 100, 0xff0000));*/
 			
 			addEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
 			addEventListener(MouseEvent.MOUSE_UP, mouseUp);
@@ -81,9 +80,9 @@ package {
 			player.draw(buffer.graphics);
 			
 			// Change player's "rotation" based on keyboard input
-			if (Main.keys[0x25] || Main.keys[0x41]) player.angle += 10;
+			if (Main.keys[0x25] || Main.keys[0x41]) player.angle -= 10;
 			//if (Main.keys[0x26] || Main.keys[0x57]) player.angle += 10;
-			if (Main.keys[0x27] || Main.keys[0x44]) player.angle -= 10;
+			if (Main.keys[0x27] || Main.keys[0x44]) player.angle += 10;
 			//if (Main.keys[0x28] || Main.keys[0x53]) player.angle -= 10;
 			
 			// Determine player acceleration based on "which way is down"

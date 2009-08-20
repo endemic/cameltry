@@ -45,14 +45,18 @@ package {
 				{
 					projection_vector.x = a.points[i - 1].y - a.points[i].y;
 					projection_vector.y = a.points[i].x - a.points[i - 1].x;
+					PlayState.buffer.graphics.lineStyle(2, 0x00ff00);
+					PlayState.buffer.graphics.drawCircle(a.points[i].x, a.points[i].y, 10);
 				}
 				else	// Use the closest point on poly and center of circle as projection vector
-				{
-					projection_vector.x = self.y - a.points[closest_point.key].y;
-					projection_vector.y = a.points[closest_point.key].x - self.x;
+				{				
+					projection_vector.x = a.points[closest_point.key].y - this.y;
+					projection_vector.y = this.x - a.points[closest_point.key].x;
 					
-/*					projection_vector.x = a.points[closest_point.key].y - self.y;
-					projection_vector.y = self.x - a.points[closest_point.key].x;*/
+					trace(closest_point.distance);
+					PlayState.buffer.graphics.lineStyle(2, 0x00ff00);
+					PlayState.buffer.graphics.drawCircle(a.points[closest_point.key].x, a.points[closest_point.key].y, 10);
+					PlayState.buffer.graphics.drawCircle(a.points[i].x, a.points[i].y, 10);
 				}
 				
 				// Find point closest to center of self to test against later
@@ -68,10 +72,10 @@ package {
 				projection_vector.x /= vector_length;
 				projection_vector.y /= vector_length;
 				
-				// Project each side of self (circle) onto projection vector
+				// Project each point of self (circle) onto projection vector
 				// Set min/max to be the first projection plus/minus circle radius
-				self.minimum = (x * projection_vector.x + y * projection_vector.y) - radius;
-				self.maximum = (x * projection_vector.x + y * projection_vector.y) + radius;
+				self.minimum = (this.x * projection_vector.x + this.y * projection_vector.y) - radius;
+				self.maximum = (this.x * projection_vector.x + this.y * projection_vector.y) + radius;
 				
 				// Correct for local vs. global offset
 				var offset:Number = x * projection_vector.x + y * projection_vector.y;
