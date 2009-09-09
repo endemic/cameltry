@@ -27,18 +27,15 @@
 			points.push(new Point(w>>1, h>>1));	// Lower right
 			points.push(new Point(-(w>>1), h>>1));	// Lower left
 			
-/*			points.push({ x: -w / 2, y: -h / 2 });	// Upper left
-			points.push({ x: w / 2, y: -h / 2 });	// Upper right
-			points.push({ x: w / 2, y: h / 2 });	// Lower right
-			points.push({ x: -w / 2, y: h / 2 });	// Lower left*/
-			
 			number_of_sides = points.length;
 		}
 		
-		public function draw(g:Graphics):void {
+		public function draw(g:Graphics):void 
+		{
+			//g.lineStyle(1, color);	// For outlines
 			g.moveTo(points[number_of_sides - 1].x + x, points[number_of_sides - 1].y + y);
-			g.lineStyle(1, color);	// For outlines
-			//g.beginFill(color);			// For solid color
+			g.lineStyle(0);
+			g.beginFill(color);			// For solid color
 			for each(var p:Object in points)
 				g.lineTo(p.x + x, p.y + y);
 			g.endFill();

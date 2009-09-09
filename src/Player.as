@@ -3,13 +3,15 @@ package {
 	import flash.display.Graphics;
 	import flash.geom.Point;
 	
-	public class Player extends Sprite {
+	public class Player extends Sprite 
+	{
 		public var radius:int;
 		public var dx:Number = 0, dy:Number = 0, ddx:Number = 0, ddy:Number = 0;	// Velocity & acceleration
 		public var angle:Number = 90;	// For determining "rotation"
 		public var g:Graphics, color:Number;
 		
-		public function Player(X:int, Y:int, Color:Number, Radius:int = 10):void {
+		public function Player(X:int, Y:int, Color:Number, Radius:int = 10):void 
+		{
 			g = graphics;
 			radius = Radius;
 			color = Color;
@@ -24,18 +26,21 @@ package {
 			g.endFill();
 		}
 		
-		public function collides_with(a:Actor):Object {
+		public function collides_with (a:Actor):Object 
+		{
 			var other:Object = { minimum: 0, maximum: 0 }
 			var self:Object = { minimum: 0, maximum: 0 }
 			var projection_vector:Object = { x: 0, y: 0 }
 			var penetration_vector:Object = { x: 0, y: 0, length: -1 }		// The shortest vector used to "push" offending polys out
-			var temp:Number, i:int = 0, j:int = 0;		// counter variables, etc.
+			var temp:Number, i:int, j:int;		// counter variables, etc.
 			var closest_point:Object = { key: 0, distance: 100000 };
-			
+
 			// Test sides of other poly
-			for(i = 0; i < a.number_of_sides + 1; i++) {
+			for (i = 0; i < 4; i++) 
+			{
 				// Get vector to project onto - to speed this up, we could pre-calculate these normals when the poly is created
 				// These are vector normals, which is why we're assigning y values to x, etc. (inverting them)
+				
 				if(i == 0) 
 				{
 					projection_vector.x = a.points[a.number_of_sides - 1].y - a.points[0].y;
@@ -45,22 +50,15 @@ package {
 				{
 					projection_vector.x = a.points[i - 1].y - a.points[i].y;
 					projection_vector.y = a.points[i].x - a.points[i - 1].x;
-					PlayState.buffer.graphics.lineStyle(2, 0x00ff00);
-					PlayState.buffer.graphics.drawCircle(a.points[i].x, a.points[i].y, 10);
 				}
 				else	// Use the closest point on poly and center of circle as projection vector
 				{				
 					projection_vector.x = a.points[closest_point.key].y - this.y;
 					projection_vector.y = this.x - a.points[closest_point.key].x;
-					
-					trace(closest_point.distance);
-					PlayState.buffer.graphics.lineStyle(2, 0x00ff00);
-					PlayState.buffer.graphics.drawCircle(a.points[closest_point.key].x, a.points[closest_point.key].y, 10);
-					PlayState.buffer.graphics.drawCircle(a.points[i].x, a.points[i].y, 10);
 				}
 				
 				// Find point closest to center of self to test against later
-				temp = Math.sqrt(Math.pow(a.points[i].x - self.x, 2) + Math.pow(a.points[i].y - self.y, 2));
+				temp = Math.sqrt(Math.pow(a.points[i].x + a.x - self.x, 2) + Math.pow(a.points[i].y + a.y - self.y, 2));
 				if(temp < closest_point.distance)
 				{
 					closest_point.distance = temp;
@@ -74,11 +72,15 @@ package {
 				
 				// Project each point of self (circle) onto projection vector
 				// Set min/max to be the first projection plus/minus circle radius
-				self.minimum = (this.x * projection_vector.x + this.y * projection_vector.y) - radius;
-				self.maximum = (this.x * projection_vector.x + this.y * projection_vector.y) + radius;
+				//self.minimum = (this.x * projection_vector.x + this.y * projection_vector.y) - radius;
+				//self.maximum = (this.x * projection_vector.x + this.y * projection_vector.y) + radius;
+				
+				// The previous was mistakenly adding global coordinates, when the other object was just using local ones
+				self.minimum = -radius;
+				self.maximum = radius;
 				
 				// Correct for local vs. global offset
-				var offset:Number = x * projection_vector.x + y * projection_vector.y;
+				var offset:Number = this.x * projection_vector.x + this.y * projection_vector.y;
 				self.minimum += offset;
 				self.maximum += offset;
 				

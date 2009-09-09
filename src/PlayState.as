@@ -14,8 +14,11 @@ package {
 		//public var buffer:BitmapData = new BitmapData(SCREEN_WIDTH, SCREEN_HEIGHT, false, 0xffffff);
 		static public var buffer:Sprite = new Sprite;
 		public var rotation_container:Sprite = new Sprite;
-	
 		public var player:Player, enemies:Array;
+		
+		// For mouse control
+		public var mouseButtonDown:Boolean = false;
+		public var startingMovementAngle:Number;
 		
 		public function PlayState():void {
 			main = this;
@@ -32,7 +35,7 @@ package {
 			enemies = new Array();
 			
 			enemies.push(new Actor(280, 300, 0xff0000));
-			/*enemies.push(new Actor(280, 280, 0xff0000));
+			enemies.push(new Actor(280, 280, 0xff0000));
 			enemies.push(new Actor(280, 260, 0xff0000));
 			enemies.push(new Actor(280, 240, 0xff0000));
 			enemies.push(new Actor(280, 220, 0xff0000));
@@ -62,12 +65,11 @@ package {
 			
 			enemies.push(new Actor(300, 100, 0xff0000));
 			enemies.push(new Actor(320, 100, 0xff0000));
-			enemies.push(new Actor(340, 100, 0xff0000));*/
+			enemies.push(new Actor(340, 100, 0xff0000));
 			
 			addEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
 			addEventListener(MouseEvent.MOUSE_UP, mouseUp);
 			addEventListener(Event.ENTER_FRAME, update);
-
 		}
 		
 		public function update(e:Event = null):void {
@@ -81,21 +83,26 @@ package {
 			
 			// Change player's "rotation" based on keyboard input
 			if (Main.keys[0x25] || Main.keys[0x41]) player.angle -= 10;
-			//if (Main.keys[0x26] || Main.keys[0x57]) player.angle += 10;
 			if (Main.keys[0x27] || Main.keys[0x44]) player.angle += 10;
-			//if (Main.keys[0x28] || Main.keys[0x53]) player.angle -= 10;
+			
+			if (mouseButtonDown) 
+			{
+				var currentAngle:Number = Math.atan2(player.x - this.mouseX, player.y - this.mouseY);
+				if (currentAngle < startingMovementAngle)
+				{
+					startingMovementAngle -= 5;
+					player.angle -= 5;
+				}
+				else if (currentAngle > startingMovementAngle) 
+				{
+					startingMovementAngle += 5;
+					player.angle += 5;
+				}
+			}
 			
 			// Determine player acceleration based on "which way is down"
-			if(Main.keys[0x28])
-			{
-				player.ddx = Math.cos(player.angle * Math.PI / 180);
-				player.ddy = Math.sin(player.angle * Math.PI / 180);	
-			}
-			else
-			{
-				player.ddx = 0;
-				player.ddy = 0;
-			}
+			player.ddx = Math.cos(player.angle * Math.PI / 180);
+			player.ddy = Math.sin(player.angle * Math.PI / 180);
 			
 			// Rotate the container that holds teh buffar
 			rotation_container.rotation = -player.angle + 90;
@@ -113,20 +120,26 @@ package {
 			buffer.y -= player.dy;
 			
 			// Collision detection
-			for each(var enemy:Actor in enemies) {
+			for each(var enemy:Actor in enemies) 
+			{
 				// Draw the enemy on the buffar!
 				enemy.draw(buffer.graphics);
 				
 				// If this is non-zero, there has been a collision
 				var penetration_vector:Object = player.collides_with(enemy);
-
-				if(penetration_vector) {
+				
+				if (penetration_vector) 
+				{
 					// Change color, just to show what was hit
 					enemy.color = 0xfff000;
 					
 					// Move player out of colliding object
 					player.x += penetration_vector.x;
 					player.y += penetration_vector.y;
+					
+					// Add a "bounce" velocity to player
+					//player.dx += 4 * penetration_vector.x * 0.8;
+					//player.dy += 4 * penetration_vector.y * 0.8;
 					
 					// Move buffer in relation to player
 					buffer.x -= penetration_vector.x;
@@ -142,10 +155,16 @@ package {
 			player.dy *= 0.8;
 		}
 		
-		public function mouseDown(e:MouseEvent = null):void {
-			player.angle = Math.atan2(SCREEN_WIDTH / 2 - this.mouseX, SCREEN_HEIGHT / 2 - this.mouseY);
+		public function mouseDown(e:MouseEvent = null):void 
+		{
+			mouseButtonDown = true;
+			startingMovementAngle = Math.atan2(player.x - this.mouseX, player.y - this.mouseY);
 		}
-		public function mouseUp(e:MouseEvent = null):void { }
+		
+		public function mouseUp(e:MouseEvent = null):void 
+		{
+			mouseButtonDown = false;
+		}
 		
 		public override function destroy():void {
 			removeChild(rotation_container);
