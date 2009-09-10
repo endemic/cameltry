@@ -1,4 +1,6 @@
 package {
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.display.Sprite;
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
@@ -18,65 +20,47 @@ package {
 		
 		// For mouse control
 		public var mouseButtonDown:Boolean = false;
-		public var startingMovementAngle:Number;
+		public var startingAngle:Number, currentAngle:Number, previousAngle:Number, mouseRotations:int = 0;		// For rotational movement
 		
 		public function PlayState():void {
 			main = this;
 			g = graphics;
 			
-			player = new Player(320, 240, 0x00ff00);
+			player = new Player(SCREEN_WIDTH >> 1, SCREEN_HEIGHT >> 1, 0x00ff00);
 			
-			buffer.x = -320; buffer.y = -240;
-			rotation_container.x = player.x; rotation_container.y = player.y;
+			buffer.x = -player.x; 
+			buffer.y = -player.y;
+			rotation_container.x = player.x; 
+			rotation_container.y = player.y;
 			
 			rotation_container.addChild(buffer);
 			addChild(rotation_container);
 			
 			enemies = new Array();
 			
-			enemies.push(new Actor(280, 300, 0xff0000));
-			enemies.push(new Actor(280, 280, 0xff0000));
-			enemies.push(new Actor(280, 260, 0xff0000));
-			enemies.push(new Actor(280, 240, 0xff0000));
-			enemies.push(new Actor(280, 220, 0xff0000));
-			enemies.push(new Actor(280, 200, 0xff0000));
-			enemies.push(new Actor(280, 180, 0xff0000));
-			enemies.push(new Actor(280, 160, 0xff0000));
-			enemies.push(new Actor(280, 140, 0xff0000));
-			enemies.push(new Actor(280, 120, 0xff0000));
-			enemies.push(new Actor(280, 100, 0xff0000));
+			// Embed a PNG, convert it to BitmapData, then use for block placement =]
+			[Embed(source = "../levels/1.png")] var LevelData:Class;
+			var levelData:Sprite = new Sprite;
+			levelData.addChild(new LevelData);
+			var bmd:BitmapData = new BitmapData(levelData.width, levelData.height);
+			bmd.draw(levelData);
 			
-			enemies.push(new Actor(360, 300, 0xff0000));
-			enemies.push(new Actor(360, 280, 0xff0000));
-			enemies.push(new Actor(360, 260, 0xff0000));
-			enemies.push(new Actor(360, 240, 0xff0000));
-			enemies.push(new Actor(360, 220, 0xff0000));
-			enemies.push(new Actor(360, 220, 0xff0000));
-			enemies.push(new Actor(360, 200, 0xff0000));
-			enemies.push(new Actor(360, 180, 0xff0000));
-			enemies.push(new Actor(360, 160, 0xff0000));
-			enemies.push(new Actor(360, 140, 0xff0000));
-			enemies.push(new Actor(360, 120, 0xff0000));
-			enemies.push(new Actor(360, 100, 0xff0000));
-			
-			enemies.push(new Actor(300, 300, 0xff0000));
-			enemies.push(new Actor(320, 300, 0xff0000));
-			enemies.push(new Actor(340, 300, 0xff0000));
-			
-			enemies.push(new Actor(300, 100, 0xff0000));
-			enemies.push(new Actor(320, 100, 0xff0000));
-			enemies.push(new Actor(340, 100, 0xff0000));
-			
+			for (var i:int = 0; i < bmd.width; i++) 
+				for (var j:int = 0; j < bmd.height; j++)
+				{
+					//trace(i + ", " + j + "=" + bmd.getPixel(i, j).toString(16));
+					if (bmd.getPixel(i, j).toString(16) == "0")
+						enemies.push(new Actor(i * 20, j * 20, 0xff0000));
+				}
+
 			addEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
 			addEventListener(MouseEvent.MOUSE_UP, mouseUp);
 			addEventListener(Event.ENTER_FRAME, update);
 		}
 		
-		public function update(e:Event = null):void {
+		public function update(e:Event = null):void 
+		{
 			buffer.graphics.clear();
-			buffer.graphics.beginFill(0x0000ff, 0.5);
-			buffer.graphics.drawRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-			buffer.graphics.endFill();
 			
 			// Draw player
 			player.draw(buffer.graphics);
@@ -87,17 +71,14 @@ package {
 			
 			if (mouseButtonDown) 
 			{
-				var currentAngle:Number = Math.atan2(player.x - this.mouseX, player.y - this.mouseY);
-				if (currentAngle < startingMovementAngle)
-				{
-					startingMovementAngle -= 5;
-					player.angle -= 5;
-				}
-				else if (currentAngle > startingMovementAngle) 
-				{
-					startingMovementAngle += 5;
-					player.angle += 5;
-				}
+				previousAngle = currentAngle;
+				currentAngle = Math.atan2(player.x - this.mouseX, player.y - this.mouseY) * 180 / Math.PI + 90;
+				var diff:Number = startingAngle - currentAngle;
+				if (diff < 0) diff += 360;
+				
+				player.angle = startingAngle - diff;		// Change to degrees
+				trace("Starting angle: " + startingAngle);
+				trace("Angle diff: " + (startingAngle - currentAngle));
 			}
 			
 			// Determine player acceleration based on "which way is down"
@@ -158,7 +139,8 @@ package {
 		public function mouseDown(e:MouseEvent = null):void 
 		{
 			mouseButtonDown = true;
-			startingMovementAngle = Math.atan2(player.x - this.mouseX, player.y - this.mouseY);
+			startingAngle = Math.atan2(player.x - this.mouseX, player.y - this.mouseY) * 180 / Math.PI + 90;
+			if (startingAngle < 0) startingAngle += 360;
 		}
 		
 		public function mouseUp(e:MouseEvent = null):void 
