@@ -11,9 +11,8 @@ package {
 		
 		public const SCREEN_WIDTH:int = 640, SCREEN_HEIGHT:int = 480;
 		static public var main:Object;
-		
+
 		public var g:Graphics;
-		//public var buffer:BitmapData = new BitmapData(SCREEN_WIDTH, SCREEN_HEIGHT, false, 0xffffff);
 		static public var buffer:Sprite = new Sprite;
 		public var rotation_container:Sprite = new Sprite;
 		public var player:Player, enemies:Array;
@@ -138,6 +137,7 @@ package {
 		
 		public function mouseDown(e:MouseEvent = null):void 
 		{
+			//Main.main.swapCursor();
 			mouseButtonDown = true;
 			startingAngle = Math.atan2(player.x - this.mouseX, player.y - this.mouseY) * 180 / Math.PI + 90;
 			if (startingAngle < 0) startingAngle += 360;
@@ -145,6 +145,7 @@ package {
 		
 		public function mouseUp(e:MouseEvent = null):void 
 		{
+			//Main.main.swapCursor();
 			mouseButtonDown = false;
 		}
 		
