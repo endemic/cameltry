@@ -4,6 +4,17 @@
 	import flash.geom.Point;
 	
 	public class Actor extends Sprite {
+		
+		/* Reworked variables
+		public var velocity:Point;
+		public var acceleration:Point;
+		public var width:int;
+		public var height:int;
+		public var x:Number;
+		public var y:Number;
+		public var angle:Number;
+		public var color:uint;
+		*/
 		public var dx:Number = 0, dy:Number = 0, ddx:Number = 0, ddy:Number = 0;	// Velocity & acceleration
 		public var w:int, h:int;	// Width/height
 		public var angle:Number = 90;	// For determining "rotation"

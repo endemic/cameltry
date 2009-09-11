@@ -21,9 +21,20 @@ package {
 		public var mouseButtonDown:Boolean = false;
 		public var startingAngle:Number, currentAngle:Number, previousAngle:Number, mouseRotations:int = 0;		// For rotational movement
 		
+		// Stuff for hand cursor
+		public var cursor:Sprite = new Sprite;
+		[Embed(source = "../images/hand-icon-open.png")] public var HandIconOpen:Class;
+		[Embed(source = "../images/hand-icon-closed.png")] public var HandIconClosed:Class;
+		
 		public function PlayState():void {
 			main = this;
 			g = graphics;
+			
+			// For some reason, mouse clicks won't activate unless there's a background
+			[Embed(source = "../images/clouds.jpg")] var CloudBackground:Class;
+			addChild(new CloudBackground);
+			this.getChildAt(0).width = SCREEN_WIDTH;
+			this.getChildAt(0).height = SCREEN_HEIGHT;
 			
 			player = new Player(SCREEN_WIDTH >> 1, SCREEN_HEIGHT >> 1, 0x00ff00);
 			
@@ -35,15 +46,27 @@ package {
 			rotation_container.addChild(buffer);
 			addChild(rotation_container);
 			
-			enemies = new Array();
+			/**
+			 * Initialize mouse cursor
+			 */
+			cursor.addChild(new HandIconOpen);
+			cursor.addChild(new HandIconClosed);
+			cursor.getChildAt(1).visible = false;
+			addChild(cursor);
+			addEventListener(MouseEvent.MOUSE_MOVE, function (e:MouseEvent):void { cursor.visible = true;  cursor.x = e.stageX; cursor.y = e.stageY; } );
+			addEventListener(Event.MOUSE_LEAVE, function (e:Event):void { cursor.visible = false; } );
 			
-			// Embed a PNG, convert it to BitmapData, then use for block placement =]
+			/**
+			 * Load the level via PNG pixel values
+			 * Embed a PNG, convert it to BitmapData, then use for block placement =]
+			 */
 			[Embed(source = "../levels/1.png")] var LevelData:Class;
 			var levelData:Sprite = new Sprite;
 			levelData.addChild(new LevelData);
 			var bmd:BitmapData = new BitmapData(levelData.width, levelData.height);
 			bmd.draw(levelData);
 			
+			enemies = new Array();
 			for (var i:int = 0; i < bmd.width; i++) 
 				for (var j:int = 0; j < bmd.height; j++)
 				{
@@ -71,7 +94,7 @@ package {
 			if (mouseButtonDown) 
 			{
 				previousAngle = currentAngle;
-				currentAngle = Math.atan2(player.x - this.mouseX, player.y - this.mouseY) * 180 / Math.PI + 90;
+				currentAngle = Math.atan2(SCREEN_WIDTH / 2 - this.mouseX, SCREEN_HEIGHT / 2 - this.mouseY) * 180 / Math.PI + 180;
 				var diff:Number = startingAngle - currentAngle;
 				if (diff < 0) diff += 360;
 				
@@ -137,20 +160,36 @@ package {
 		
 		public function mouseDown(e:MouseEvent = null):void 
 		{
-			//Main.main.swapCursor();
+			swapCursor();
 			mouseButtonDown = true;
-			startingAngle = Math.atan2(player.x - this.mouseX, player.y - this.mouseY) * 180 / Math.PI + 90;
-			if (startingAngle < 0) startingAngle += 360;
+			startingAngle = Math.atan2(SCREEN_WIDTH / 2 - this.mouseX, SCREEN_HEIGHT / 2 - this.mouseY) * 180 / Math.PI + 180;
+			//if (startingAngle < 0) startingAngle += 360;
+			
 		}
 		
 		public function mouseUp(e:MouseEvent = null):void 
 		{
-			//Main.main.swapCursor();
+			swapCursor();
 			mouseButtonDown = false;
+		}
+		
+				public function swapCursor():void
+		{
+			if (cursor.getChildAt(1).visible == true)
+			{
+				cursor.getChildAt(1).visible = false;
+				cursor.getChildAt(0).visible = true;
+			}
+			else
+			{
+				cursor.getChildAt(1).visible = true;
+				cursor.getChildAt(0).visible = false;
+			}
 		}
 		
 		public override function destroy():void {
 			removeChild(rotation_container);
+			removeChild(cursor);
 			removeEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
 			removeEventListener(MouseEvent.MOUSE_UP, mouseUp);
 			removeEventListener(Event.ENTER_FRAME, update);
