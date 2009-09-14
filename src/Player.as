@@ -20,9 +20,9 @@ package {
 		}
 		
 		public function draw(g:Graphics):void {
-			g.lineStyle(1, color);	// For outlines
-			//g.beginFill(color);			// For solid color
-			g.drawCircle(x, y, radius);
+			g.lineStyle(1, 0x000000);	// For outlines
+			g.beginFill(color);			// For solid color
+			g.drawCircle(x, y, radius);	// Will always draw in the center of the screen
 			g.endFill();
 		}
 		

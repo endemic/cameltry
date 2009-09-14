@@ -9,13 +9,17 @@ package {
 	
 	public class PlayState extends GameState {
 		
-		public const SCREEN_WIDTH:int = 640, SCREEN_HEIGHT:int = 480;
+		static public var SCREEN_WIDTH:int = 640, SCREEN_HEIGHT:int = 480;
 		static public var main:Object;
 
 		public var g:Graphics;
 		static public var buffer:Sprite = new Sprite;
 		public var rotation_container:Sprite = new Sprite;
-		public var player:Player, enemies:Array;
+		
+		// Containes for variables
+		public var player:Player;
+		public var enemies:Array;
+		public var blocks:Array;
 		
 		// For mouse control
 		public var mouseButtonDown:Boolean = false;
@@ -57,6 +61,20 @@ package {
 			addEventListener(Event.MOUSE_LEAVE, function (e:Event):void { cursor.visible = false; } );
 			
 			/**
+			 * Create 100x100 2D level array - each cell represents 100x100px
+			 */
+			
+			 blocks = new Array(100);
+			 for (var i:int = 0; i < blocks.size; i++) 
+			 {
+				 blocks[i] = new Array(100);
+				 for (var j:int = 0; i < blocks[i].length; j++) 
+				 {
+					 blocks[i][j] = new Array;
+				 }
+			 }
+			 
+			/**
 			 * Load the level via PNG pixel values
 			 * Embed a PNG, convert it to BitmapData, then use for block placement =]
 			 */
@@ -67,12 +85,14 @@ package {
 			bmd.draw(levelData);
 			
 			enemies = new Array();
-			for (var i:int = 0; i < bmd.width; i++) 
-				for (var j:int = 0; j < bmd.height; j++)
+			for (i = 0; i < bmd.width; i++) 
+				for (j = 0; j < bmd.height; j++)
 				{
 					//trace(i + ", " + j + "=" + bmd.getPixel(i, j).toString(16));
+					trace("Trying to put a block in cell " + Math.floor(i * 20 / 100) + "," + Math.floor(j * 20 / 100));
 					if (bmd.getPixel(i, j).toString(16) == "0")
 						enemies.push(new Actor(i * 20, j * 20, 0xff0000));
+						//blocks[Math.floor(i * 20 / 100)][Math.floor(j * 20 / 100)].push(new Actor(i * 20, j * 20, 0xff0000));
 				}
 
 			addEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
@@ -95,10 +115,10 @@ package {
 			{
 				previousAngle = currentAngle;
 				currentAngle = Math.atan2(SCREEN_WIDTH / 2 - this.mouseX, SCREEN_HEIGHT / 2 - this.mouseY) * 180 / Math.PI + 180;
-				var diff:Number = startingAngle - currentAngle;
-				if (diff < 0) diff += 360;
+				//var diff:Number = startingAngle - currentAngle;
+				var diff:Number = currentAngle - previousAngle;
 				
-				player.angle = startingAngle - diff;		// Change to degrees
+				player.angle += diff;		// Change to degrees
 				trace("Starting angle: " + startingAngle);
 				trace("Angle diff: " + (startingAngle - currentAngle));
 			}
@@ -122,7 +142,10 @@ package {
 			buffer.x -= player.dx;
 			buffer.y -= player.dy;
 			
+			// Determine which collision detection "block" the player is in
+
 			// Collision detection
+			//blocks[Math.floor(player.x / 100)][Math.floor(player.y / 100)]
 			for each(var enemy:Actor in enemies) 
 			{
 				// Draw the enemy on the buffar!
@@ -162,7 +185,7 @@ package {
 		{
 			swapCursor();
 			mouseButtonDown = true;
-			startingAngle = Math.atan2(SCREEN_WIDTH / 2 - this.mouseX, SCREEN_HEIGHT / 2 - this.mouseY) * 180 / Math.PI + 180;
+			startingAngle = currentAngle = Math.atan2(SCREEN_WIDTH / 2 - this.mouseX, SCREEN_HEIGHT / 2 - this.mouseY) * 180 / Math.PI + 180;
 			//if (startingAngle < 0) startingAngle += 360;
 			
 		}
@@ -173,7 +196,7 @@ package {
 			mouseButtonDown = false;
 		}
 		
-				public function swapCursor():void
+		public function swapCursor():void
 		{
 			if (cursor.getChildAt(1).visible == true)
 			{
