@@ -65,10 +65,10 @@ package {
 			 */
 			
 			 blocks = new Array(100);
-			 for (var i:int = 0; i < blocks.size; i++) 
+			 for (var i:int = 0; i < blocks.length; i++) 
 			 {
 				 blocks[i] = new Array(100);
-				 for (var j:int = 0; i < blocks[i].length; j++) 
+				 for (var j:int = 0; j < blocks[i].length; j++) 
 				 {
 					 blocks[i][j] = new Array;
 				 }
@@ -89,10 +89,12 @@ package {
 				for (j = 0; j < bmd.height; j++)
 				{
 					//trace(i + ", " + j + "=" + bmd.getPixel(i, j).toString(16));
-					trace("Trying to put a block in cell " + Math.floor(i * 20 / 100) + "," + Math.floor(j * 20 / 100));
-					if (bmd.getPixel(i, j).toString(16) == "0")
-						enemies.push(new Actor(i * 20, j * 20, 0xff0000));
-						//blocks[Math.floor(i * 20 / 100)][Math.floor(j * 20 / 100)].push(new Actor(i * 20, j * 20, 0xff0000));
+					//trace("Trying to put a block in cell " + Math.floor(i * 20 / 100) + "," + Math.floor(j * 20 / 100));
+					if (bmd.getPixel(i, j).toString(16) == "0") 
+					{
+						//enemies.push(new Actor(i * 20, j * 20, 0xff0000));
+						blocks[Math.floor(i * 20 / 100)][Math.floor(j * 20 / 100)].push(new Actor(i * 20, j * 20, 0xff0000));
+					}
 				}
 
 			addEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
@@ -115,12 +117,11 @@ package {
 			{
 				previousAngle = currentAngle;
 				currentAngle = Math.atan2(SCREEN_WIDTH / 2 - this.mouseX, SCREEN_HEIGHT / 2 - this.mouseY) * 180 / Math.PI + 180;
-				//var diff:Number = startingAngle - currentAngle;
 				var diff:Number = currentAngle - previousAngle;
 				
 				player.angle += diff;		// Change to degrees
-				trace("Starting angle: " + startingAngle);
-				trace("Angle diff: " + (startingAngle - currentAngle));
+				//trace("Starting angle: " + startingAngle);
+				//trace("Angle diff: " + (startingAngle - currentAngle));
 			}
 			
 			// Determine player acceleration based on "which way is down"
@@ -145,8 +146,18 @@ package {
 			// Determine which collision detection "block" the player is in
 
 			// Collision detection
-			//blocks[Math.floor(player.x / 100)][Math.floor(player.y / 100)]
-			for each(var enemy:Actor in enemies) 
+			var playerXCell:int = Math.floor(player.x / 100);
+			var playerYCell:int = Math.floor(player.y / 100);
+			var collisionArray:Array = new Array;
+			
+			// Make an array of the 9 collision detection block arrays around the player
+			for (var i:int = playerXCell - 1; i <= playerXCell + 1; i++) 
+				for (var j:int = playerYCell - 1; j <= playerYCell + 1; j++) 
+					if (i >= 0 && i < 100 && j >=0 && j < 100) 
+						collisionArray = collisionArray.concat(blocks[i][j]);
+						
+			for each (var enemy:Actor in collisionArray)
+			//for each(var enemy:Actor in enemies) 
 			{
 				// Draw the enemy on the buffar!
 				enemy.draw(buffer.graphics);
